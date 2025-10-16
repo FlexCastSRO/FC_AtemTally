@@ -6,3 +6,7 @@ FC_AtemTally/FC_AtemTallyServer/bin/
 FC_AtemTally/FC_AtemTallyServer/obj/
 
 *.user
+
+FC_AtemTally/FC_AtemTallyClient/bin/
+
+FC_AtemTally/FC_AtemTallyClient/obj/

@@ -8,7 +8,7 @@ namespace FC_AtemTallyServer.Services
     internal class AtemDiscoveryService
     {
 
-        private string _ProgramInputs;
+        private string _ProgramInputs = string.Empty;
         public string ProgramInputs
         {
             get => _ProgramInputs;
@@ -17,12 +17,15 @@ namespace FC_AtemTallyServer.Services
                 if (_ProgramInputs != value)
                 {
                     _ProgramInputs = value;
-                    ProgramChanged();
+                    if (ProgramChanged != null)
+                    {
+                        ProgramChanged();
+                    }
                 }
             }
         }
 
-        private string _PreviewInputs;
+        private string _PreviewInputs = string.Empty;
         public string PreviewInputs
         {
             get => _PreviewInputs;
@@ -31,13 +34,16 @@ namespace FC_AtemTallyServer.Services
                 if (_PreviewInputs != value)
                 {
                     _PreviewInputs = value;
-                    PreviewChanged();
+                    if (PreviewChanged != null)
+                    {
+                        PreviewChanged();
+                    }
                 }
             }
         }
 
-        public Action ProgramChanged { get; set; }
-        public Action PreviewChanged { get; set; }
+        public Action? ProgramChanged { get; set; }
+        public Action? PreviewChanged { get; set; }
 
         private readonly AtemClient _client;
 
@@ -58,10 +64,14 @@ namespace FC_AtemTallyServer.Services
                 try
                 {
                     if (cmd is ProgramInputGetCommand)
-                        HandleProgram(cmd as ProgramInputGetCommand);
+                    {
+                        HandleProgram((ProgramInputGetCommand)cmd);
+                    }
                     else if (cmd is PreviewInputGetCommand)
-                        HandlePreview(cmd as PreviewInputGetCommand);
-                }
+                    {
+                        HandlePreview((PreviewInputGetCommand)cmd);
+                    }
+                } 
                 catch (Exception e)
                 {
                     Console.WriteLine("T: {0}", e);

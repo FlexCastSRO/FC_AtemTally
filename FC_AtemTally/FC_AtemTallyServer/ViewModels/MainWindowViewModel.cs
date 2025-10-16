@@ -9,7 +9,7 @@ namespace FC_AtemTallyServer.ViewModels
     {
         public string Title { get; set; }
 
-        private string _ProgramInputValue;
+        private string _ProgramInputValue = string.Empty;
         public string ProgramInputValue
         {
             set
@@ -23,7 +23,7 @@ namespace FC_AtemTallyServer.ViewModels
             get => _ProgramInputValue;
         }
 
-        private string _PreviewInputValue;
+        private string _PreviewInputValue = string.Empty;
         public string PreviewInputValue
         {
             set
@@ -62,7 +62,7 @@ namespace FC_AtemTallyServer.ViewModels
 
         #region INotifyPropertyChanged
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         protected void OnPropertyChanged(string name)
         {
