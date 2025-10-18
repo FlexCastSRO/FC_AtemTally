@@ -1,12 +1,30 @@
 ﻿using LibAtem.Net;
 using LibAtem.Commands;
 using LibAtem.Commands.MixEffects;
+using LibAtem.Commands.Settings;
 
 
 namespace FC_AtemTallyServer.Services
 {
-    internal class AtemDiscoveryService
+    internal class AtemDiscoveryService : IAtemDiscoveryService
     {
+
+        private int _ExternalInputsCount = 0;
+        public int ExternalInputsCount
+        {
+            get => _ExternalInputsCount;
+            set
+            {
+                if (_ExternalInputsCount != value)
+                {
+                    _ExternalInputsCount = value;
+                    if (ExternalInputsCountChanged != null)
+                    {
+                        ExternalInputsCountChanged();
+                    }
+                }
+            }
+        }
 
         private string _ProgramInputs = string.Empty;
         public string ProgramInputs
@@ -42,49 +60,90 @@ namespace FC_AtemTallyServer.Services
             }
         }
 
+
+        public Action? ExternalInputsCountChanged { get; set; }
         public Action? ProgramChanged { get; set; }
         public Action? PreviewChanged { get; set; }
+        public Action? AtemConnected { get; set; }
+        public Action? AtemDisconnected { get; set; }
 
-        private readonly AtemClient _client;
 
-        public AtemDiscoveryService()
+        private AtemClient? _client;
+
+        public void Init(string atemIpAddress)
         {
-            _client = new AtemClient("192.168.1.104");
+            _client = new AtemClient(atemIpAddress, false);
+            _client.OnConnection += (object sender) => 
+            {
+                if (AtemConnected != null)
+                {
+                    AtemConnected();
+                }
+            };
+
+            _client.OnDisconnect += (object sender) =>
+            {
+                if (AtemDisconnected != null)
+                {
+                    AtemDisconnected();
+                }
+            };
+
+            _client.OnReceive += OnReceiveHandler;
         }
 
-        public void Start()
+        public void Connect()
         {
-            _client.OnReceive += OnCommand;
+            _client?.Connect();
         }
 
-        private void OnCommand(object sender, IReadOnlyList<ICommand> commands)
+        private void OnReceiveHandler(object sender, IReadOnlyList<ICommand> commands)
         {
+            int externalInputsCount = 0;
+
             foreach (ICommand cmd in commands)
             {
                 try
                 {
-                    if (cmd is ProgramInputGetCommand)
+                    if (cmd is InputPropertiesGetCommand)
                     {
-                        HandleProgram((ProgramInputGetCommand)cmd);
+                        HandleInputPropertiesGetCommand(ref externalInputsCount, (InputPropertiesGetCommand)cmd);
+                    }
+                    else if (cmd is ProgramInputGetCommand)
+                    {
+                        HandleProgramInputGetCommand((ProgramInputGetCommand)cmd);
                     }
                     else if (cmd is PreviewInputGetCommand)
                     {
-                        HandlePreview((PreviewInputGetCommand)cmd);
+                        HandlePreviewInputGetCommand((PreviewInputGetCommand)cmd);
                     }
                 } 
                 catch (Exception e)
                 {
-                    Console.WriteLine("T: {0}", e);
+                    // TODO: ERROR HANDLING
                 }
+            }
+
+            if (externalInputsCount > 0)
+            {
+                ExternalInputsCount = externalInputsCount;
             }
         }
 
-        private void HandleProgram(ProgramInputGetCommand cmd)
+        private void HandleInputPropertiesGetCommand(ref int externalInputsCount, InputPropertiesGetCommand cmd)
+        {
+            if (cmd.InternalPortType == LibAtem.Common.InternalPortType.External)
+            {
+                externalInputsCount++;
+            }
+        }
+
+        private void HandleProgramInputGetCommand(ProgramInputGetCommand cmd)
         {
             ProgramInputs = cmd.Source.ToString();
         }
 
-        private void HandlePreview(PreviewInputGetCommand cmd)
+        private void HandlePreviewInputGetCommand(PreviewInputGetCommand cmd)
         {
             PreviewInputs = cmd.Source.ToString();
         }

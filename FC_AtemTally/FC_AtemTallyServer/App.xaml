@@ -3,6 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:FC_AtemTallyServer">
     <Application.Resources>
-         
+        <Style TargetType="Label">
+            <Setter Property="Foreground" Value="#c2cdcf" />
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Foreground" Value="#000000" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
     </Application.Resources>
 </Application>

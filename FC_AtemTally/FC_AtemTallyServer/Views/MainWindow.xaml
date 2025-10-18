@@ -5,17 +5,53 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FC_AtemTallyServer"
         mc:Ignorable="d"
-        Title="{Binding Title}" Height="450" Width="800">
+        Title="FlexCast :: Atem Tally Server" Height="450" Width="800" MinHeight="450" MinWidth="800" Background="#272a31">
     <Grid>
-        <StackPanel Width="200" Margin="10">
-            <Label FontWeight="Bold" >Program</Label>
-            <TextBox FontWeight="Bold" FontSize="50" HorizontalContentAlignment="Center" 
-                     Foreground="White" Background="Red" 
-                     Text="{Binding ProgramInputValue, FallbackValue='-1', TargetNullValue='-1'}" />
-            <Label FontWeight="Bold" >Preview</Label>
-            <TextBox FontWeight="Bold" FontSize="50" HorizontalContentAlignment="Center" 
-                     Foreground="White" Background="Lime" 
-                     Text="{Binding PreviewInputValue, FallbackValue='-1', TargetNullValue='-1'}" />
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="25" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+
+        <!--INPUTS PANEL-->
+        <StackPanel Margin="10">
+
+
         </StackPanel>
+
+        <!--CONTROL PANEL -->
+        <StackPanel Grid.Column="1" Margin="10" >
+            <Label Content="Atem IP Address" Padding="6,0,0,0" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBox Grid.Column="0" Height="25" Margin="5"
+                    Text="{Binding AtemIpAddress, FallbackValue='255.255.255.255', Mode=TwoWay}" />
+
+                <Button Grid.Column="1" Height="25" Margin="5"
+                    Content="Connect" Command="{Binding ConnectToAtemCmd}" />
+            </Grid>
+            <Separator Height="5" Margin="0" />
+        </StackPanel>
+
+        <!--STATUS BAR-->
+        <UniformGrid Grid.ColumnSpan="2" Columns="2" Grid.Row="1" Background="LightGray">
+            <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+                <TextBlock Text="Status: " VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding AtemConnectionStatusMessage, FallbackValue='Default Atem Connection Message'}" 
+                    Margin="5,0,0,0" VerticalAlignment="Center"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,20,0">
+                <TextBlock Text="Version: " VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding ApplicationVersion, FallbackValue='0.0.0.0'}"
+                    Margin="5,0,0,0" VerticalAlignment="Center"/>
+            </StackPanel>
+        </UniformGrid>
     </Grid>
 </Window>

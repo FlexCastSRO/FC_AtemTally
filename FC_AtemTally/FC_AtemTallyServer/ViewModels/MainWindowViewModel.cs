@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
-
+using System.Windows.Input;
+using FC_AtemTallyServer.Commands;
 using FC_AtemTallyServer.Services;
 
 
@@ -7,57 +8,66 @@ namespace FC_AtemTallyServer.ViewModels
 {
     public class MainWindowViewModel : INotifyPropertyChanged
     {
-        public string Title { get; set; }
+        #region Properties
 
-        private string _ProgramInputValue = string.Empty;
-        public string ProgramInputValue
+        private string _AtemIpAddress = "192.168.1.100";
+        public string AtemIpAddress
         {
             set
             {
-                if (_ProgramInputValue != value)
+                if (_AtemIpAddress != value)
                 {
-                    _ProgramInputValue = value;
-                    OnPropertyChanged(nameof(ProgramInputValue));
+                    _AtemIpAddress = value;
+                    OnPropertyChanged(nameof(AtemIpAddress));
                 }
             }
-            get => _ProgramInputValue;
+            get => _AtemIpAddress;
         }
 
-        private string _PreviewInputValue = string.Empty;
-        public string PreviewInputValue
+        private string _AtemConnectionStatusMessage = "Not connected";
+        public string AtemConnectionStatusMessage
         {
             set
             {
-                if (_PreviewInputValue != value)
+                if (_AtemConnectionStatusMessage != value)
                 {
-                    _PreviewInputValue = value;
-                    OnPropertyChanged(nameof(PreviewInputValue));
+                    _AtemConnectionStatusMessage = value;
+                    OnPropertyChanged(nameof(AtemConnectionStatusMessage));
                 }
             }
-            get => _PreviewInputValue;
+            get => _AtemConnectionStatusMessage;
         }
 
-        private const string _applicationName = "Atem Tally Server";
+        public string ApplicationVersion
+        {
+            get
+            {
+                var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+                if (version != null)
+                {
+                    return version.ToString();
+                }
+                return "N/A";
+            }
+        }
 
-        AtemDiscoveryService _service;
+        #endregion
+
+        #region Commands
+
+        public ICommand ConnectToAtemCmd { get; set; }
+
+        #endregion
+
+        private IAtemDiscoveryService _atemDiscoveryService;
 
         public MainWindowViewModel()
         {
-            Title = _applicationName;
-            _service = new AtemDiscoveryService();
-            _service.ProgramChanged = UpdateProgramInputValue;
-            _service.PreviewChanged = UpdatePreviewInputValue;
-            _service.Start();
-        }
+            // Services
+            _atemDiscoveryService = new AtemDiscoveryService();
 
-        private void UpdateProgramInputValue()
-        {
-            ProgramInputValue = _service.ProgramInputs;
-        }
-
-        private void UpdatePreviewInputValue()
-        {
-            PreviewInputValue = _service.PreviewInputs;
+            // Commands
+            ConnectToAtemCmd = new ConnectToAtemCommand(this, _atemDiscoveryService);
         }
 
         #region INotifyPropertyChanged
