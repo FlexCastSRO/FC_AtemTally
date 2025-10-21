@@ -19,31 +19,44 @@ namespace FC_AtemTallyServer.Converters
                 {
                     if (booleanValue)
                     {
-                        return (SolidColorBrush)new BrushConverter().ConvertFrom("#ff0000");
+                        return GetSolidColorBrushFromHex("#ff0000");
                     }
                     else
                     {
-                        return (SolidColorBrush)new BrushConverter().ConvertFrom("#222222");
+                        return GetSolidColorBrushFromHex("#222222");
                     }
                 }
                 else if (stringParameter == "PRW")
                 {
                     if (booleanValue)
                     {
-                        return (SolidColorBrush)new BrushConverter().ConvertFrom("#00ff00");
+                        return GetSolidColorBrushFromHex("#00ff00");
                     }
                     else
                     {
-                        return (SolidColorBrush)new BrushConverter().ConvertFrom("#222222");
+                        return GetSolidColorBrushFromHex("#222222");
                     }
                 }
             }
-            return (SolidColorBrush)new BrushConverter().ConvertFrom("#000000");
+            return GetSolidColorBrushFromHex("#000000");
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
+        }
+
+        private SolidColorBrush GetSolidColorBrushFromHex(string hex)
+        {
+            BrushConverter brushConverter = new BrushConverter();
+            object? brushConverterObject = brushConverter.ConvertFromString(hex);
+
+            if (brushConverterObject != null)
+            {
+                return (SolidColorBrush)brushConverterObject;
+            }
+
+            return new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
         }
     }
 }
