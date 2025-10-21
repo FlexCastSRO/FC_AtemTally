@@ -5,7 +5,7 @@ using LibAtem.Commands.Settings;
 
 namespace FC_AtemTallyServer.Services
 {
-    internal class AtemDiscoveryService : IAtemDiscoveryService
+    public class AtemControlService : IAtemControlService
     {
         public Action? AtemConnected { get; set; }
         public Action? AtemDisconnected { get; set; }
@@ -23,7 +23,7 @@ namespace FC_AtemTallyServer.Services
         private TallyByInputCommand? _lastTallyStatus;
         private TallyByInputCommand? _currentTallyStatus;
 
-        public AtemDiscoveryService()
+        public AtemControlService()
         {
             _loadExternalInputCommands = true;
             _externalInputsCommands = new List<InputPropertiesGetCommand>();

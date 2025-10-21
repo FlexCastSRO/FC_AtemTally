@@ -16,14 +16,14 @@ namespace FC_AtemTallyServer.Commands
         }
 
         private readonly MainWindowViewModel _viewModel;
-        private readonly IAtemDiscoveryService _atemDiscoveryService;
+        private readonly IAtemControlService _atemControlService;
 
         private bool _atemConnected;
 
-        public ConnectToAtemCommand(MainWindowViewModel viewModel, IAtemDiscoveryService atemDiscoveryService)
+        public ConnectToAtemCommand(MainWindowViewModel viewModel, IAtemControlService atemControlService)
         {
             _viewModel = viewModel;
-            _atemDiscoveryService = atemDiscoveryService;
+            _atemControlService = atemControlService;
         }
 
         public bool CanExecute(object? parameter)
@@ -33,13 +33,13 @@ namespace FC_AtemTallyServer.Commands
 
         public void Execute(object? parameter)
         {
-            _atemDiscoveryService.Init(_viewModel.AtemIpAddress);
-            _atemDiscoveryService.AtemConnected = AtemConnectedHandler;
-            _atemDiscoveryService.AtemDisconnected = AtemDisconnectedHandler;
-            _atemDiscoveryService.ExternalInputsLoaded = ExternalInputsLoadedHandler;
-            _atemDiscoveryService.TallyStatusChanged += TallyStatusChangedHandler;
-            _atemDiscoveryService.ErrorMessageChanged += ErrorMessageChangedHandler;
-            _atemDiscoveryService.Connect();
+            _atemControlService.Init(_viewModel.AtemIpAddress);
+            _atemControlService.AtemConnected = AtemConnectedHandler;
+            _atemControlService.AtemDisconnected = AtemDisconnectedHandler;
+            _atemControlService.ExternalInputsLoaded = ExternalInputsLoadedHandler;
+            _atemControlService.TallyStatusChanged += TallyStatusChangedHandler;
+            _atemControlService.ErrorMessageChanged += ErrorMessageChangedHandler;
+            _atemControlService.Connect();
         }
 
         private void AtemConnectedHandler()

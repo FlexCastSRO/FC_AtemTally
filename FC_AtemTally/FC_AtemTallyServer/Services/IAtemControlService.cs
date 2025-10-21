@@ -3,7 +3,7 @@ using LibAtem.Commands.Settings;
 
 namespace FC_AtemTallyServer.Services
 {
-    internal interface IAtemDiscoveryService
+    public interface IAtemControlService
     {
         public Action? AtemConnected { get; set; }
         public Action? AtemDisconnected { get; set; }

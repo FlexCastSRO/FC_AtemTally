@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using FC_AtemTallyServer.ViewModels;
 using FC_AtemTallyServer.Views;
+using FC_AtemTallyServer.Services;
 
 
 namespace FC_AtemTallyServer
@@ -29,6 +30,7 @@ namespace FC_AtemTallyServer
     {
         public static void ConfigureServices(this IServiceCollection services)
         {
+            services.AddSingleton<IAtemControlService, AtemControlService>();
             services.AddSingleton<MainWindowViewModel>();
             services.AddSingleton<MainWindow>();
         }
