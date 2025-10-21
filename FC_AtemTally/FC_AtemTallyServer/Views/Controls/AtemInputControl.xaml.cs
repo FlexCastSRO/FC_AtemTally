@@ -1,7 +1,5 @@
 ﻿using System.Windows.Controls;
 
-using FC_AtemTallyServer.ViewModels.Controls;
-
 
 namespace FC_AtemTallyServer.Views.Controls
 {
@@ -10,9 +8,8 @@ namespace FC_AtemTallyServer.Views.Controls
     /// </summary>
     public partial class AtemInputControl : UserControl
     {
-        public AtemInputControl(AtemInputControlViewModel viewModel)
+        public AtemInputControl()
         {
-            DataContext = viewModel;
             InitializeComponent();
         }
     }

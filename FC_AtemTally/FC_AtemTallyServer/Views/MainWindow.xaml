@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:FC_AtemTallyServer"
+        xmlns:controls="clr-namespace:FC_AtemTallyServer.Views.Controls"
         mc:Ignorable="d"
         Title="FlexCast :: Atem Tally Server" Height="450" Width="800" MinHeight="450" MinWidth="800" Background="#272a31">
     <Grid>
@@ -17,10 +18,25 @@
         </Grid.ColumnDefinitions>
 
         <!--INPUTS PANEL-->
-        <StackPanel Margin="10">
-
-
-        </StackPanel>
+        <Grid Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20" />
+                <RowDefinition Height="1*" />
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" Content="Inputs" Padding="6,0,0,0" />
+            <ListView Grid.Row="1" ItemsSource="{Binding AtemInputsVMs}" Background="Transparent">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <controls:AtemInputControl DataContext="{Binding}" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Grid>
 
         <!--CONTROL PANEL -->
         <StackPanel Grid.Column="1" Margin="10" >
@@ -42,12 +58,12 @@
 
         <!--STATUS BAR-->
         <UniformGrid Grid.ColumnSpan="2" Columns="2" Grid.Row="1" Background="LightGray">
-            <StackPanel Orientation="Horizontal" Margin="20,0,0,0">
+            <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
                 <TextBlock Text="Status: " VerticalAlignment="Center"/>
                 <TextBlock Text="{Binding AtemConnectionStatusMessage, FallbackValue='Default Atem Connection Message'}" 
                     Margin="5,0,0,0" VerticalAlignment="Center"/>
             </StackPanel>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,20,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0">
                 <TextBlock Text="Version: " VerticalAlignment="Center"/>
                 <TextBlock Text="{Binding ApplicationVersion, FallbackValue='0.0.0.0'}"
                     Margin="5,0,0,0" VerticalAlignment="Center"/>

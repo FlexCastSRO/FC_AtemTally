@@ -5,8 +5,22 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:FC_AtemTallyServer.Views.Controls"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="50" d:DesignWidth="400" Background="Black">
     <Grid>
-            
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="60" />
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="80"/>
+            <ColumnDefinition Width="80" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Label Grid.Column="0" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Content="{Binding InputNumber, FallbackValue='X'}" />
+        <UniformGrid Grid.Column="1" Rows="2">
+
+            <Label Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" Content="{Binding ShortName, FallbackValue='NAME'}" />
+            <Label Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center" Content="{Binding LongName, FallbackValue='LONG NAME'}" />
+        </UniformGrid>
+        <Rectangle Grid.Column="2" Fill="{Binding ProgramOn, FallbackValue='Red', Converter={StaticResource BoolToTallyColorConverter}, ConverterParameter='PGM'}" Margin="5" />
+        <Rectangle Grid.Column="3" Fill="{Binding PreviewOn, FallbackValue='Lime', Converter={StaticResource BoolToTallyColorConverter}, ConverterParameter='PRW'}" Margin="5" />
     </Grid>
 </UserControl>

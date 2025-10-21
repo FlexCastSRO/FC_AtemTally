@@ -1,7 +1,9 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows.Input;
 using FC_AtemTallyServer.Commands;
 using FC_AtemTallyServer.Services;
+using FC_AtemTallyServer.ViewModels.Controls;
 
 
 namespace FC_AtemTallyServer.ViewModels
@@ -51,6 +53,8 @@ namespace FC_AtemTallyServer.ViewModels
             }
         }
 
+        public ObservableCollection<AtemInputControlViewModel> AtemInputsVMs { get; set; }
+
         #endregion
 
         #region Commands
@@ -63,6 +67,9 @@ namespace FC_AtemTallyServer.ViewModels
 
         public MainWindowViewModel()
         {
+            // Collections
+            AtemInputsVMs = new ObservableCollection<AtemInputControlViewModel>();
+
             // Services
             _atemDiscoveryService = new AtemDiscoveryService();
 

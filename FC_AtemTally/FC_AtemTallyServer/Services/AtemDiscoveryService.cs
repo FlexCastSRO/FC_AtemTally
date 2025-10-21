@@ -1,6 +1,5 @@
 ﻿using LibAtem.Net;
 using LibAtem.Commands;
-using LibAtem.Commands.MixEffects;
 using LibAtem.Commands.Settings;
 
 
@@ -8,67 +7,27 @@ namespace FC_AtemTallyServer.Services
 {
     internal class AtemDiscoveryService : IAtemDiscoveryService
     {
-
-        private int _ExternalInputsCount = 0;
-        public int ExternalInputsCount
-        {
-            get => _ExternalInputsCount;
-            set
-            {
-                if (_ExternalInputsCount != value)
-                {
-                    _ExternalInputsCount = value;
-                    if (ExternalInputsCountChanged != null)
-                    {
-                        ExternalInputsCountChanged();
-                    }
-                }
-            }
-        }
-
-        private string _ProgramInputs = string.Empty;
-        public string ProgramInputs
-        {
-            get => _ProgramInputs;
-            set
-            {
-                if (_ProgramInputs != value)
-                {
-                    _ProgramInputs = value;
-                    if (ProgramChanged != null)
-                    {
-                        ProgramChanged();
-                    }
-                }
-            }
-        }
-
-        private string _PreviewInputs = string.Empty;
-        public string PreviewInputs
-        {
-            get => _PreviewInputs;
-            set
-            {
-                if (_PreviewInputs != value)
-                {
-                    _PreviewInputs = value;
-                    if (PreviewChanged != null)
-                    {
-                        PreviewChanged();
-                    }
-                }
-            }
-        }
-
-
-        public Action? ExternalInputsCountChanged { get; set; }
-        public Action? ProgramChanged { get; set; }
-        public Action? PreviewChanged { get; set; }
         public Action? AtemConnected { get; set; }
         public Action? AtemDisconnected { get; set; }
+        public Action<List<InputPropertiesGetCommand>>? ExternalInputsLoaded { get; set; }
 
+        public event Action<TallyByInputCommand>? TallyStatusChanged;
+        public event Action<string>? ErrorMessageChanged;
 
         private AtemClient? _client;
+
+        private bool _loadExternalInputCommands;
+        private List<InputPropertiesGetCommand> _externalInputsCommands;
+
+
+        private TallyByInputCommand? _lastTallyStatus;
+        private TallyByInputCommand? _currentTallyStatus;
+
+        public AtemDiscoveryService()
+        {
+            _loadExternalInputCommands = true;
+            _externalInputsCommands = new List<InputPropertiesGetCommand>();
+        }
 
         public void Init(string atemIpAddress)
         {
@@ -78,6 +37,7 @@ namespace FC_AtemTallyServer.Services
                 if (AtemConnected != null)
                 {
                     AtemConnected();
+                    _externalInputsCommands.Clear();
                 }
             };
 
@@ -86,6 +46,7 @@ namespace FC_AtemTallyServer.Services
                 if (AtemDisconnected != null)
                 {
                     AtemDisconnected();
+                    _loadExternalInputCommands = true;
                 }
             };
 
@@ -99,53 +60,106 @@ namespace FC_AtemTallyServer.Services
 
         private void OnReceiveHandler(object sender, IReadOnlyList<ICommand> commands)
         {
-            int externalInputsCount = 0;
-
             foreach (ICommand cmd in commands)
             {
                 try
                 {
                     if (cmd is InputPropertiesGetCommand)
                     {
-                        HandleInputPropertiesGetCommand(ref externalInputsCount, (InputPropertiesGetCommand)cmd);
+                        if (_loadExternalInputCommands)
+                        {
+                            HandleInputPropertiesGetCommand((InputPropertiesGetCommand)cmd);
+                        }
                     }
-                    else if (cmd is ProgramInputGetCommand)
+                    else if (cmd is TallyByInputCommand)
                     {
-                        HandleProgramInputGetCommand((ProgramInputGetCommand)cmd);
-                    }
-                    else if (cmd is PreviewInputGetCommand)
-                    {
-                        HandlePreviewInputGetCommand((PreviewInputGetCommand)cmd);
+                        HandleTallyByInputCommand((TallyByInputCommand)cmd);
                     }
                 } 
                 catch (Exception e)
                 {
-                    // TODO: ERROR HANDLING
+                    if (ErrorMessageChanged != null)
+                    {
+                        ErrorMessageChanged(e.Message);
+                    }
                 }
             }
 
-            if (externalInputsCount > 0)
+            if (ExternalInputsLoaded != null && _loadExternalInputCommands)
             {
-                ExternalInputsCount = externalInputsCount;
+                ExternalInputsLoaded(_externalInputsCommands);
             }
+
+            _loadExternalInputCommands = false;
         }
 
-        private void HandleInputPropertiesGetCommand(ref int externalInputsCount, InputPropertiesGetCommand cmd)
+        private void HandleInputPropertiesGetCommand(InputPropertiesGetCommand cmd)
         {
             if (cmd.InternalPortType == LibAtem.Common.InternalPortType.External)
             {
-                externalInputsCount++;
+                _externalInputsCommands.Add(cmd);
             }
         }
 
-        private void HandleProgramInputGetCommand(ProgramInputGetCommand cmd)
+        private void HandleTallyByInputCommand(TallyByInputCommand cmd)
         {
-            ProgramInputs = cmd.Source.ToString();
+            _currentTallyStatus = cmd;
+            if (_lastTallyStatus == null)
+            {
+                _lastTallyStatus = cmd;
+                if (TallyStatusChanged != null)
+                {
+                    TallyStatusChanged(_lastTallyStatus);
+                }
+                return;
+            }
+
+            if (CheckTallyStatusChange())
+            {
+                if (TallyStatusChanged != null)
+                {
+                    if (_lastTallyStatus != null)
+                    {
+                        TallyStatusChanged(_lastTallyStatus);
+                    }
+                }
+            }
         }
 
-        private void HandlePreviewInputGetCommand(PreviewInputGetCommand cmd)
+        private bool CheckTallyStatusChange()
         {
-            PreviewInputs = cmd.Source.ToString();
+            bool tallyChanged = false;
+
+            if (_currentTallyStatus != null && _lastTallyStatus != null)
+            {
+                if (_lastTallyStatus.Tally.Count != _currentTallyStatus.Tally.Count)
+                {
+                    // If List sizes different, program bus had to change, we replace _last with _current
+                    tallyChanged = true;
+                    _lastTallyStatus?.Tally.Clear();
+
+                    foreach (var item in _currentTallyStatus.Tally)
+                    {
+                        _lastTallyStatus?.Tally.Add(item);
+                    }
+                }
+                else
+                {
+                    // If list sizes are the same we need to check element by element
+                    for (int i = 0; i < _currentTallyStatus.Tally.Count; i++)
+                    {
+                        if (_lastTallyStatus.Tally[i].Item1 != _currentTallyStatus.Tally[i].Item1 
+                            || _lastTallyStatus.Tally[i].Item2 != _currentTallyStatus.Tally[i].Item2)
+                        {
+                            tallyChanged = true;
+                            _lastTallyStatus.Tally[i] = new Tuple<bool, bool>(_currentTallyStatus.Tally[i].Item1,
+                                _currentTallyStatus.Tally[i].Item2);
+                        }
+                    }
+                }
+            }
+
+            return tallyChanged;
         }
     }
 }
